@@ -4,18 +4,19 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const shop = searchParams.get('shop')
   const code = searchParams.get('code')
+  const state = searchParams.get('state')
 
-  const clientId = request.cookies.get('client_id')?.value
-  const secret = request.cookies.get('client_secret')?.value
-
-  if (!shop || !code || !clientId || !secret) {
+  if (!shop || !code || !state) {
     return NextResponse.redirect(`${process.env.HOST}/api/auth/login`)
   }
+
+  const decoded = Buffer.from(state, 'base64').toString('utf-8')
+  const [clientId, clientSecret] = decoded.split(':')
 
   const response = await fetch(`https://${shop}/admin/oauth/access_token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ client_id: clientId, client_secret: secret, code }),
+    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, code }),
   })
 
   const data = await response.json()
