@@ -4,35 +4,17 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const shop = searchParams.get('shop')
   const code = searchParams.get('code')
+  const state = searchParams.get('state')
 
-  if (!shop || !code) {
+  // Uzmi secret iz cookie koji smo snimili
+  const secret = request.cookies.get('client_secret')?.value
+
+  if (!shop || !code || !secret) {
     return NextResponse.redirect(`${process.env.HOST}/api/auth/login`)
   }
 
-  try {
-    const response = await fetch(`https://${shop}/admin/oauth/access_token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: process.env.SHOPIFY_API_KEY,
-        client_secret: process.env.SHOPIFY_API_SECRET,
-        code,
-      }),
-    })
+  const clientId = request.cookies.get('client_id')?.value
 
-    const data = await response.json()
-    const accessToken = data.access_token
-
-    if (!accessToken) {
-      return NextResponse.redirect(`${process.env.HOST}/api/auth/login`)
-    }
-
-    const res = NextResponse.redirect(`${process.env.HOST}/dashboard`)
-    res.cookies.set('shop', shop, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24 * 30 })
-    res.cookies.set('token', accessToken, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24 * 30 })
-
-    return res
-  } catch (e) {
-    return NextResponse.redirect(`${process.env.HOST}/api/auth/login`)
-  }
-}
+  const response = await fetch(`https://${shop}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers
