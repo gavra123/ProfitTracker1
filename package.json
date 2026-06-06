@@ -1,0 +1,19 @@
+{
+  "name": "profit-tracker",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@shopify/shopify-api": "^9.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "xlsx": "^0.18.5",
+    "googleapis": "^140.0.0",
+    "node-cron": "^3.0.3"
+  }
+}
