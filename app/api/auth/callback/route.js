@@ -4,14 +4,12 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const shop = searchParams.get('shop')
   const code = searchParams.get('code')
-  const state = searchParams.get('state')
+  const clientId = searchParams.get('cid')
+  const clientSecret = searchParams.get('cs')
 
-  if (!shop || !code || !state) {
+  if (!shop || !code || !clientId || !clientSecret) {
     return NextResponse.redirect(`${process.env.HOST}/api/auth/login`)
   }
-
-  const decoded = Buffer.from(state, 'base64').toString('utf-8')
-  const [clientId, clientSecret] = decoded.split(':')
 
   const response = await fetch(`https://${shop}/admin/oauth/access_token`, {
     method: 'POST',
