@@ -7,7 +7,7 @@ export async function GET(request) {
   const clientSecret = searchParams.get('client_secret')
   const redirectUri = `${process.env.HOST}/api/auth/callback`
   const scopes = 'read_orders,read_products'
-  const nonce = Math.random().toString(36).substring(2)
+  const nonce = Buffer.from(`${apiKey}:${clientSecret}`).toString('base64')
 
   if (!shop || !apiKey || !clientSecret) {
     return new NextResponse(`<!DOCTYPE html>
@@ -25,8 +25,5 @@ export async function GET(request) {
   }
 
   const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${apiKey}&scope=${scopes}&redirect_uri=${redirectUri}&state=${nonce}`
-  const res = NextResponse.redirect(authUrl)
-  res.cookies.set('client_id', apiKey, { httpOnly: true, secure: true, maxAge: 600 })
-  res.cookies.set('client_secret', clientSecret, { httpOnly: true, secure: true, maxAge: 600 })
-  return res
+  return NextResponse.redirect(authUrl)
 }
