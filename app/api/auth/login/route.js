@@ -4,14 +4,15 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const shop = searchParams.get('shop')
   const apiKey = searchParams.get('client_id')
+  const clientSecret = searchParams.get('client_secret')
   const redirectUri = `${process.env.HOST}/api/auth/callback`
   const scopes = 'read_orders,read_products'
   const nonce = Math.random().toString(36).substring(2)
 
-  if (!shop || !apiKey) {
+  if (!shop || !apiKey || !clientSecret) {
     return new NextResponse(`<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Profit Tracker</title>
-<style>*{box-sizing:border-box}body{font-family:sans-serif;max-width:420px;margin:4rem auto;padding:1rem}input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:6px;font-size:1rem}button{width:100%;padding:12px;background:#000;color:#fff;border:none;border-radius:6px;font-size:1rem;cursor:pointer}</style>
+<style>*{box-sizing:border-box}body{font-family:sans-serif;max-width:420px;margin:4rem auto;padding:1rem}h2{margin-bottom:1rem}input{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:6px;font-size:1rem}button{width:100%;padding:12px;background:#000;color:#fff;border:none;border-radius:6px;font-size:1rem;cursor:pointer;margin-top:8px}</style>
 </head><body>
 <h2>Profit Tracker</h2>
 <form method="GET">
@@ -24,5 +25,8 @@ export async function GET(request) {
   }
 
   const authUrl = `https://${shop}/admin/oauth/authorize?client_id=${apiKey}&scope=${scopes}&redirect_uri=${redirectUri}&state=${nonce}`
-  return NextResponse.redirect(authUrl)
+  const res = NextResponse.redirect(authUrl)
+  res.cookies.set('client_id', apiKey, { httpOnly: true, secure: true, maxAge: 600 })
+  res.cookies.set('client_secret', clientSecret, { httpOnly: true, secure: true, maxAge: 600 })
+  return res
 }
